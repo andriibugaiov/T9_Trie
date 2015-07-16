@@ -1,8 +1,10 @@
 
-#include <iostream>
 #include "T9CharsTrie.h"
+#include "T9TernaryDigitsTrie.h"
 
-void load(T9CharsTrie &trie) {
+#include <iostream>
+
+void load(T9Trie &trie) {
 	std::cout << "T9 Chars Trie loading..." << std::endl;
 	
 	std::vector<std::string> dictionary = {"git", "github", "git merge", "hit", "history"};
@@ -21,7 +23,7 @@ void load(T9CharsTrie &trie) {
 	} while (expression.size());
 }
 
-void autocomplete(T9CharsTrie &trie) {
+void autocomplete(T9Trie &trie) {
 	std::string prefix;
 	do {
 		trie.displayTuples(std::cout);
@@ -45,7 +47,7 @@ void autocomplete(T9CharsTrie &trie) {
 				for (int i = 0; i < digits.size(); ++i) {
 					std::vector<std::string> expressions;
 					std::vector<int> subDigits(digits.begin(), digits.begin() + i + 1);
-					trie.autocomplete(subDigits, expressions/*, true*/);
+					trie.autocomplete(subDigits, expressions, false);
 					std::cout << "T9 digit prefix: " << subDigits << std::endl;
 					std::cout << "Displaying autocomplete expressions..." << std::endl;
 					std::cout << expressions << std::endl;
@@ -60,7 +62,8 @@ void autocomplete(T9CharsTrie &trie) {
 }
 
 int main() {
-	T9CharsTrie trie;
+//	T9CharsTrie trie;
+	T9TernaryDigitsTrie trie;
 	
 	load(trie);
 	autocomplete(trie);

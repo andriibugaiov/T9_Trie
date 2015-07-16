@@ -1,33 +1,13 @@
-//
-//  T9CharsTrie.h
-//  workplace
-//
-//  Created by Andrii Bugaiov on 2015-07-16.
-//  Copyright (c) 2015 MyCompany. All rights reserved.
-//
 
 #ifndef workplace_T9CharsTrie_h
 #define workplace_T9CharsTrie_h
 
-#include <iostream>
+#include "T9Trie.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
-
-template<typename T> std::ostream& operator<< (std::ostream& os, const std::vector<T>& v) {
-	os << "[";
-	size_t last = v.size() - 1;
-	for(size_t i = 0; i < v.size(); ++i) {
-		os << v[i];
-		if (i != last)
-			os << ", ";
-	}
-	os << "]";
-	return os;
-}
-
-// mark -
 
 class ExpressionInfo {
 public:
@@ -56,14 +36,14 @@ public:
 	}
 };
 
-class TrieNode {
+class T9CTNode {
 public:
-	TrieNode **_charNodes;
+	T9CTNode **_charNodes;
 	bool _terminal;
 	
-	TrieNode(unsigned long count) {
+	T9CTNode(size_t count) {
 		if (count > 0) {
-			_charNodes = new TrieNode *[count];
+			_charNodes = new T9CTNode *[count];
 			for (int i = 0; i < count; ++i)
 				_charNodes[i] = nullptr;
 		} else {
@@ -71,7 +51,7 @@ public:
 		}
 		_terminal = false;
 	}
-	~TrieNode() {
+	~T9CTNode() {
 		if (_charNodes) {
 			delete [] _charNodes;
 			_charNodes = nullptr;
@@ -79,21 +59,23 @@ public:
 	}
 };
 
-class T9CharsTrie {
-	void clear(TrieNode *&node) {
+class T9CharsTrie : public T9Trie {
+	void clear(T9CTNode *&node) {
+		if (!node)
+			return;
+		
 		for (int i = 0; i < _chars.size(); ++i)
-			if (node -> _charNodes[i])
-				clear(node -> _charNodes[i]);
+			clear(node -> _charNodes[i]);
 		
 		delete node;
 		node = nullptr;
 	}
 	
-	void insert(TrieNode *node, std::string &expression, int idx) {
+	void insert(T9CTNode *node, std::string &expression, int idx) {
 		if (idx < expression.size()) {
 			int childIdx = _charDigitMap.at(expression[idx]);
 			if (!node -> _charNodes[childIdx])
-				node -> _charNodes[childIdx] = new TrieNode(_chars.size());
+				node -> _charNodes[childIdx] = new T9CTNode(_chars.size());
 			insert(node -> _charNodes[childIdx], expression, idx + 1);
 		} else
 			node -> _terminal = true;
@@ -104,7 +86,7 @@ class T9CharsTrie {
 		expressionInfo.update(++_timestamp);
 	}
 	
-	void complete(TrieNode *node, std::string &expression, std::vector<std::string> &expressions, bool best = false) {
+	void complete(T9CTNode *node, std::string &expression, std::vector<std::string> &expressions, bool best = false) {
 		for (int i = 0; i < _chars.size(); ++i) {
 			if (node -> _charNodes[i]) {
 				expression.push_back(_chars[i]);
@@ -124,7 +106,7 @@ class T9CharsTrie {
 		}
 	}
 	
-	void autocomplete(TrieNode *node, std::vector<int> &digits, int idx, std::string &expression, std::vector<std::string> &expressions, bool best = false) {
+	void autocomplete(T9CTNode *node, std::vector<int> &digits, int idx, std::string &expression, std::vector<std::string> &expressions, bool best = false) {
 		if (idx < digits.size()) {
 			std::vector<char> &tuple = _tupes[digits[idx]];
 			for (int i = 0; i < tuple.size(); ++i) {
@@ -140,7 +122,7 @@ class T9CharsTrie {
 		}
 	}
 public:
-	TrieNode *_root;
+	T9CTNode *_root;
 	
 	std::vector<std::vector<char>> _tupes;
 	std::vector<char> _chars;
@@ -169,26 +151,29 @@ public:
 		for (int i = 0; i < _chars.size(); ++i)
 			_charDigitMap[_chars[i]] = i;
 		
-		_root = new TrieNode(_chars.size());
+		_root = new T9CTNode(_chars.size());
 	}
 	
 	~T9CharsTrie() {
 		clear(_root);
 	}
 	
-	void insert(std::string &expression) {
-		update(expression);
-		insert(_root, expression, 0);
+	virtual void insert(std::string &expression) {
+		if (expression.size()) {
+			update(expression);
+			insert(_root, expression, 0);
+		}
 	}
 	
-	void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) {
+	virtual void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) {
 		if (digits.size()) {
+			expressions.clear();
 			std::string expression;
 			autocomplete(_root, digits, 0, expression, expressions, best);
 		}
 	}
 	
-	void displayTuples(std::ostream &os) {
+	virtual void displayTuples(std::ostream &os) {
 		for (int i = 0; i < _tupes.size(); ++i) {
 			os << i << " : " << _tupes[i] << std::endl;
 		}
