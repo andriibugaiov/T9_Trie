@@ -22,7 +22,9 @@ public:
 	virtual void displayTuples(std::ostream &os) = 0;
 	virtual void insert(std::string &expression) = 0;
 	virtual void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) = 0;
-
+	
+	virtual ~T9Trie() {
+	};
 };
 
 #endif

@@ -110,7 +110,7 @@ public:
 		_root = nullptr;
 	}
 	
-	~T9TernaryDigitsTrie() {
+	virtual ~T9TernaryDigitsTrie() {
 		clear(_root);
 	}
 	

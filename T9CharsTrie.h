@@ -154,7 +154,7 @@ public:
 		_root = new T9CTNode(_chars.size());
 	}
 	
-	~T9CharsTrie() {
+	virtual ~T9CharsTrie() {
 		clear(_root);
 	}
 	

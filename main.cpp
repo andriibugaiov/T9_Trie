@@ -1,6 +1,7 @@
 
 #include "T9CharsTrie.h"
 #include "T9TernaryDigitsTrie.h"
+#include "T9NaryDigitsTrie.h"
 
 #include <iostream>
 
