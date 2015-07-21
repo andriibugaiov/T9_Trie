@@ -64,7 +64,8 @@ void autocomplete(T9Trie &trie) {
 
 int main() {
 //	T9CharsTrie trie;
-	T9TernaryDigitsTrie trie;
+//	T9TernaryDigitsTrie trie;
+	T9NaryDigitsTrie trie;
 	
 	load(trie);
 	autocomplete(trie);

@@ -78,20 +78,22 @@ class T9TernaryDigitsTrie : public T9Trie {
 			} 
 		}
 		
-		if (!expressions.size()) {
+		if (expressions.empty())
 			if (!(node -> _expressions).empty()) {
-				expressions.push_back((node -> _expressions).front());
+				std::list<std::string>::iterator itr = (node -> _expressions).begin();
+				while (itr != (node -> _expressions).end()) {
+					expressions.push_back(*(itr++));
+				}
 			}
-		}
 	}
 public:
 	T9TDTNode *_root;
 	
-	std::vector<std::vector<char>> _tupes;
+	std::vector<std::vector<char>> _tuples;
 	std::unordered_map<char, int> _charDigitMap;
 	
 	T9TernaryDigitsTrie() {
-		_tupes = {
+		_tuples = {
 			{' '},
 			{',', '.', '?', '!'},
 			{'a', 'b', 'c'},
@@ -103,9 +105,9 @@ public:
 			{'t', 'u', 'v'},
 			{'w', 'x', 'y', 'z'}
 		};
-		for (int i = 0; i < _tupes.size(); ++i)
-			for (int j = 0; j < _tupes[i].size(); ++j)
-				_charDigitMap[_tupes[i][j]] = i;
+		for (int i = 0; i < _tuples.size(); ++i)
+			for (int j = 0; j < _tuples[i].size(); ++j)
+				_charDigitMap[_tuples[i][j]] = i;
 		
 		_root = nullptr;
 	}
@@ -115,21 +117,21 @@ public:
 	}
 	
 	virtual void insert(std::string &expression) {
-		if (expression.size()) {
+		if (!expression.empty()) {
 			insert(_root, expression, 0);
 		}
 	}
 	
 	virtual void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) {
-		if (digits.size()) {
+		if (!digits.empty()) {
 			expressions.clear();
 			autocomplete(_root, digits, 0, expressions, best);
 		}
 	}
 	
 	virtual void displayTuples(std::ostream &os) {
-		for (int i = 0; i < _tupes.size(); ++i) {
-			os << i << " : " << _tupes[i] << std::endl;
+		for (int i = 0; i < _tuples.size(); ++i) {
+			os << i << " : " << _tuples[i] << std::endl;
 		}
 	}
 };

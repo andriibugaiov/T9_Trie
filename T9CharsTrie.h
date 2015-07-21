@@ -95,7 +95,7 @@ class T9CharsTrie : public T9Trie {
 			}
 		}
 		if (node -> _terminal) {
-			if (!best || (best && !expressions.size())) {
+			if (!best || (best && expressions.empty())) {
 				expressions.push_back(expression);
 			} else {
 				if (_expressionsInfo.at(expressions[0]) < _expressionsInfo.at(expression)) {
@@ -108,7 +108,7 @@ class T9CharsTrie : public T9Trie {
 	
 	void autocomplete(T9CTNode *node, std::vector<int> &digits, int idx, std::string &expression, std::vector<std::string> &expressions, bool best = false) {
 		if (idx < digits.size()) {
-			std::vector<char> &tuple = _tupes[digits[idx]];
+			std::vector<char> &tuple = _tuples[digits[idx]];
 			for (int i = 0; i < tuple.size(); ++i) {
 				int childIdx = _charDigitMap.at(tuple[i]);
 				if (node -> _charNodes[childIdx]) {
@@ -117,14 +117,14 @@ class T9CharsTrie : public T9Trie {
 					expression.pop_back();
 				}
 			}
-		} else if (expression.size()) {
+		} else if (!expression.empty()) {
 			complete(node, expression, expressions, best);
 		}
 	}
 public:
 	T9CTNode *_root;
 	
-	std::vector<std::vector<char>> _tupes;
+	std::vector<std::vector<char>> _tuples;
 	std::vector<char> _chars;
 	std::unordered_map<char, int> _charDigitMap;
 	
@@ -132,7 +132,7 @@ public:
 	std::unordered_map<std::string, ExpressionInfo> _expressionsInfo;
 	
 	T9CharsTrie() {
-		_tupes = {
+		_tuples = {
 			{' '},
 			{',', '.', '?', '!'},
 			{'a', 'b', 'c'},
@@ -144,9 +144,9 @@ public:
 			{'t', 'u', 'v'},
 			{'w', 'x', 'y', 'z'}
 		};
-		for (int i = 0; i < _tupes.size(); ++i)
-			for (int j = 0; j < _tupes[i].size(); ++j)
-				_chars.push_back(_tupes[i][j]);
+		for (int i = 0; i < _tuples.size(); ++i)
+			for (int j = 0; j < _tuples[i].size(); ++j)
+				_chars.push_back(_tuples[i][j]);
 		
 		for (int i = 0; i < _chars.size(); ++i)
 			_charDigitMap[_chars[i]] = i;
@@ -159,14 +159,14 @@ public:
 	}
 	
 	virtual void insert(std::string &expression) {
-		if (expression.size()) {
+		if (!expression.empty()) {
 			update(expression);
 			insert(_root, expression, 0);
 		}
 	}
 	
 	virtual void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) {
-		if (digits.size()) {
+		if (!digits.empty()) {
 			expressions.clear();
 			std::string expression;
 			autocomplete(_root, digits, 0, expression, expressions, best);
@@ -174,8 +174,8 @@ public:
 	}
 	
 	virtual void displayTuples(std::ostream &os) {
-		for (int i = 0; i < _tupes.size(); ++i) {
-			os << i << " : " << _tupes[i] << std::endl;
+		for (int i = 0; i < _tuples.size(); ++i) {
+			os << i << " : " << _tuples[i] << std::endl;
 		}
 	}
 };

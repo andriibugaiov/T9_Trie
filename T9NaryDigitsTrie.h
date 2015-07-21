@@ -8,10 +8,13 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <list>
 
 class T9NDTNode {
 public:
 	T9NDTNode **_digitNodes;
+	
+	std::list<std::string> _expressions;
 	
 	T9NDTNode(size_t count) {
 		if (count > 0) {
@@ -32,14 +35,52 @@ public:
 };
 
 class T9NaryDigitsTrie : public T9Trie {
+	void clear(T9NDTNode *&node) {
+		if (!node)
+			return;
+		
+		for (int i = 0; i < _tuples.size(); ++i)
+			clear(node -> _digitNodes[i]);
+		
+		delete node;
+		node = nullptr;
+	}
+	
+	void insert(T9NDTNode *node, std::string &expression, int idx) {
+		if (idx < expression.size()) {
+			int digit = _charDigitMap.at(expression[idx]);
+			if (!node -> _digitNodes[digit]) {
+				node -> _digitNodes[digit] = new T9NDTNode(_tuples.size());
+			}
+			insert(node -> _digitNodes[digit], expression, idx + 1);
+		} else
+			(node -> _expressions).push_front(expression);
+	}
+	
+	void autocomplete(T9NDTNode *node, std::vector<int> &digits, int idx, std::vector<std::string> &expressions, bool best = false) {
+		if (idx < digits.size()) {
+			int digit = digits[idx];
+			if (node -> _digitNodes[digit]){
+				autocomplete(node -> _digitNodes[digit], digits, idx + 1, expressions, best);
+			}
+		}
+		
+		if (expressions.empty())
+			if (!(node -> _expressions).empty()) {
+				std::list<std::string>::iterator itr = (node -> _expressions).begin();
+				while (itr != (node -> _expressions).end()) {
+					expressions.push_back(*(itr++));
+				}
+			}
+	}
 public:
 	T9NDTNode *_root;
 	
-	std::vector<std::vector<char>> _tupes;
+	std::vector<std::vector<char>> _tuples;
 	std::unordered_map<char, int> _charDigitMap;
 	
 	T9NaryDigitsTrie() {
-		_tupes = {
+		_tuples = {
 			{' '},
 			{',', '.', '?', '!'},
 			{'a', 'b', 'c'},
@@ -51,28 +92,33 @@ public:
 			{'t', 'u', 'v'},
 			{'w', 'x', 'y', 'z'}
 		};
-		for (int i = 0; i < _tupes.size(); ++i)
-			for (int j = 0; j < _tupes[i].size(); ++j)
-				_charDigitMap[_tupes[i][j]] = i;
+		for (int i = 0; i < _tuples.size(); ++i)
+			for (int j = 0; j < _tuples[i].size(); ++j)
+				_charDigitMap[_tuples[i][j]] = i;
 		
-		_root = new T9NDTNode(_tupes.size());
+		_root = new T9NDTNode(_tuples.size());
 	}
 	
 	virtual ~T9NaryDigitsTrie() {
-		// TODO:
+		clear(_root);
 	}
 	
 	virtual void insert(std::string &expression) {
-		// TODO:
+		if (!expression.empty()) {
+			insert(_root, expression, 0);
+		}
 	}
 	
 	virtual void autocomplete(std::vector<int> &digits, std::vector<std::string> &expressions, bool best = false) {
-		// TODO:
+		if (!digits.empty()) {
+			expressions.clear();
+			autocomplete(_root, digits, 0, expressions, best);
+		}
 	}
 	
 	virtual void displayTuples(std::ostream &os) {
-		for (int i = 0; i < _tupes.size(); ++i) {
-			os << i << " : " << _tupes[i] << std::endl;
+		for (int i = 0; i < _tuples.size(); ++i) {
+			os << i << " : " << _tuples[i] << std::endl;
 		}
 	}
 };
